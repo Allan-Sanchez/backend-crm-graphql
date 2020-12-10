@@ -1,6 +1,8 @@
 import User from "../models/User";
 import Product from "../models/Product";
 import Client from "../models/Client";
+import Order from "../models/Order";
+
 import bcryptjs from "bcryptjs";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
@@ -174,6 +176,39 @@ const resolvers = {
       }
       await Client.findOneAndDelete({_id:id});
       return "Client delete successfully";
+    },
+    newOrder : async (_,{input},ctx) =>{
+      // validated client existed
+      const {client} = input;
+      let existClient = await Client.findById(client);
+      if (!existClient) {
+        throw new Error("client not found");
+      }
+      // validate user
+      if (existClient.seller.toString() !== ctx.user.id) {
+        throw new Error("client not Authorized");
+      }
+
+      // checking stock available
+      for await (const item of input.order) {
+        const {id} = item;
+        const product = await Product.findById(id);
+        if(item.quantity > product.stock){
+          throw new Error(`The product ${product.name} exceeds the quantity available`);
+        }else{
+          // update stoke
+          product.stock = product.stock - item.quantity;
+          await product.save();
+        }
+      }
+
+      // create new order
+      const newOrder = new Order(input);
+      // assign selesman
+      newOrder.saller = ctx.user.id;
+      //save DB
+      const response = newOrder.save();
+      return response;
     }
   },
 };
