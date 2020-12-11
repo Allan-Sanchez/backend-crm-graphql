@@ -33,7 +33,7 @@ const typeDefs = gql`
 
   type Order{
     id: ID
-    order: OrderGroup
+    order: [OrderGroup]
     total: Float
     client: ID
     seller: ID
@@ -79,7 +79,13 @@ const typeDefs = gql`
     order:[OrderProductInput]
     total: Float!
     client: ID!
-    state: StateOrder
+    state: StateOrder!
+  }
+  input OrderInputUpdate{
+    order:[OrderProductInput]
+    total: Float
+    client: ID!
+    state: StateOrder!
   }
 
   enum StateOrder {
@@ -100,6 +106,12 @@ const typeDefs = gql`
     getClients: [Client]
     getClientsSeller: [Client]
     getClient(id: ID!): Client
+
+    # Order
+    getOrders: [Order]
+    getOrdersSeller: [Order]
+    getOrder(id: ID!): Order
+    getOrdersByState(state: String!):[Order]
   }
   type Mutation {
     # User
@@ -118,6 +130,8 @@ const typeDefs = gql`
 
     #Order
     newOrder(input: OrderInput) : Order
+    updateOrder(id: ID!, input: OrderInputUpdate): Order
+    deleteOrder(id: ID!): String
   }
 `;
 

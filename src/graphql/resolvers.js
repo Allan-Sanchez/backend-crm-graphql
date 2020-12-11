@@ -63,6 +63,37 @@ const resolvers = {
       }
       return existClient;
     },
+
+    getOrders: async () => {
+      try {
+        const orders = await Order.find({});
+        return orders;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getOrdersSeller: async(_,{},ctx) =>{
+      try {
+        const orders = await Order.find({seller:ctx.user.id});
+        return orders;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getOrder: async (_, { id }, ctx) => {
+      const existOrder = await Order.findById(id);
+      if (!existOrder) {
+        throw new Error("Order not found");
+      }
+      if (existOrder.seller.toString() !== ctx.user.id) {
+        throw new Error("client not Authorized");
+      }
+      return existOrder;
+    },
+    getOrdersByState: async (_,{state},ctx) =>{
+      const orders = await Order.find({seller:ctx.user.id,state});
+      return orders;
+    }
   },
   Mutation: {
     newUser: async (_, { input }) => {
@@ -203,12 +234,59 @@ const resolvers = {
       }
 
       // create new order
-      const newOrder = new Order(input);
+      let newOrder = new Order(input);
       // assign selesman
-      newOrder.saller = ctx.user.id;
+      newOrder.seller = ctx.user.id;
       //save DB
-      const response = newOrder.save();
+      const response = await newOrder.save();
       return response;
+    },
+    updateOrder: async (_,{id,input},ctx) =>{
+      const {client} = input;
+      // validated order existed
+      const existOrder = await Order.findById(id);
+      if (!existOrder) {
+        throw new Error("Order not found");
+      }
+      // validated client existed
+      let existClient = await Client.findById(client);
+      if (!existClient) {
+        throw new Error("client not found");
+      }
+      // validate user
+      if (existClient.seller.toString() !== ctx.user.id) {
+        throw new Error("client not Authorized");
+      }
+
+      if(input.order){
+        // checking stock available
+        for await (const item of input.order) {
+          const {id} = item;
+          const product = await Product.findById(id);
+          if(item.quantity > product.stock){
+            throw new Error(`The product ${product.name} exceeds the quantity available`);
+          }else{
+            // update stoke
+            product.stock = product.stock - item.quantity;
+            await product.save();
+          }
+        }
+      }
+      const response = await Order.findOneAndUpdate({_id:id},input,{new:true});
+      return response;
+
+
+    },
+    deleteOrder: async(_,{id},ctx) =>{
+      let existOrder = await Order.findById(id);
+      if (!existOrder) {
+        throw new Error("Order not found");
+      }
+      if (existOrder.seller.toString() !== ctx.user.id) {
+        throw new Error("client not Authorized");
+      }
+      await Order.findOneAndDelete({_id:id});
+      return "Order delete successfully";
     }
   },
 };
