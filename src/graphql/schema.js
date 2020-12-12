@@ -45,6 +45,16 @@ const typeDefs = gql`
     quantity: Int
   }
 
+  type BestClient{
+    total:Float
+    client: [Client]
+  }
+
+  type BestSeller{
+    total:Float
+    seller:[User]
+  }
+
   input UserInput {
     name: String!
     lastName: String!
@@ -112,6 +122,11 @@ const typeDefs = gql`
     getOrdersSeller: [Order]
     getOrder(id: ID!): Order
     getOrdersByState(state: String!):[Order]
+    
+    # complex_querys
+    getBestClients: [BestClient]
+    getBestSellers: [BestSeller]
+    getSearchProduct(text: String!): [Product]
   }
   type Mutation {
     # User

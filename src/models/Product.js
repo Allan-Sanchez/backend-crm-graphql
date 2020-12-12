@@ -23,4 +23,5 @@ const ProductSchema = new Schema({
     versionKey:false
 });
 
+ProductSchema.index({name:'text'})
 export default model('Product',ProductSchema);
