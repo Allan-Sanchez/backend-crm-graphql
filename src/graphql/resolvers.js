@@ -15,10 +15,10 @@ const createToken = (user, secret, expiresIn) => {
 
 const resolvers = {
   Query: {
-    getUser: (_, { token }) => {
-      const userId = jwt.verify(token, process.env.SECRET);
-
-      return userId;
+    getUser: (_, {}, ctx) => {
+      // const userId = jwt.verify(token, process.env.SECRET);
+      // return userId;
+      return ctx.user;
     },
 
     getProducts: async () => {
