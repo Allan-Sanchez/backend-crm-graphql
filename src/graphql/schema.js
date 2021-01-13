@@ -43,6 +43,8 @@ const typeDefs = gql`
   type OrderGroup{
     id:ID
     quantity: Int
+    name:String
+    price:Float
   }
 
   type BestClient{
@@ -83,13 +85,15 @@ const typeDefs = gql`
   input OrderProductInput{
     id: ID
     quantity: Int
+    name:String
+    price:Float
   }
 
   input OrderInput{
     order:[OrderProductInput]
     total: Float!
     client: ID!
-    state: StateOrder!
+    state: StateOrder
   }
   input OrderInputUpdate{
     order:[OrderProductInput]

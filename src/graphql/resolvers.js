@@ -298,6 +298,7 @@ const resolvers = {
       let newOrder = new Order(input);
       // assign selesman
       newOrder.seller = ctx.user.id;
+      newOrder.state = "PENDING";
       //save DB
       const response = await newOrder.save();
       return response;
