@@ -1,6 +1,6 @@
 import {Schema, model} from 'mongoose';
 
-const ClientModel = new Schema({
+const ClientSchema = new Schema({
     name:{
         type:String,
         trim:true,
@@ -36,4 +36,4 @@ const ClientModel = new Schema({
     versionKey:false
 });
 
-export default model('Client',ClientModel);
+export default model('Client',ClientSchema);
